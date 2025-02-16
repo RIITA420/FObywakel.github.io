@@ -8,6 +8,10 @@ self.addEventListener('beforeinstallprompt', (event) => {
     showInstallButton();
 });
 
+self.addEventListener("install", (event) => {
+  console.log("Service Worker zainstalowany");
+});
+
 // Function to show a custom install button or other UI element
 function showInstallButton() {
     // Show the install button or other UI element
