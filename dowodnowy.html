@@ -246,18 +246,6 @@ body, html {
               <img src="./images/godlo.gif" alt="godlo" id="godlo">
              <script>
                     const godlo = document.getElementById('godlo');
-            
-                    window.addEventListener('deviceorientation', (event) => {
-                        const rotationX = event.beta; 
-                        const rotationY = event.gamma; 
-            
-                        const amplifiedRotationX = rotationX * 15; 
-                        const amplifiedRotationY = rotationY * 15; 
-            
-                        const limitedRotationX = Math.min(Math.max(amplifiedRotationX, -100), 100);
-                        const limitedRotationY = Math.min(Math.max(amplifiedRotationY, -100), 100);
-            
-                        godlo.style.transform = `rotateX(${limitedRotationX}deg) rotateY(${limitedRotationY}deg)`;
                     });
                 </script>
             
