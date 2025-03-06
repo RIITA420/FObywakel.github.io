@@ -1,35 +1,49 @@
-// Add event listener for beforeinstallprompt event
-self.addEventListener('beforeinstallprompt', (event) => {
-    // Prevent the default behavior
+let deferredPrompt;
+
+// Obsługa beforeinstallprompt, żeby wyświetlić przycisk instalacji
+self.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
-    // Store the event object for later use
     deferredPrompt = event;
-    // Show a custom install button or other UI element
     showInstallButton();
 });
 
+function showInstallButton() {
+    const installButton = document.getElementById("install-button");
+    if (installButton) {
+        installButton.style.display = "block";
+        installButton.addEventListener("click", () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                console.log(choiceResult.outcome === "accepted" ? "User accepted the install prompt" : "User dismissed the install prompt");
+                deferredPrompt = null;
+            });
+        });
+    }
+}
+
+// Instalacja Service Workera i cache'owanie plików
 self.addEventListener("install", (event) => {
-  console.log("Service Worker zainstalowany");
+    console.log("Service Worker: Zainstalowany");
+    event.waitUntil(
+        caches.open("pwa-cache").then((cache) => {
+            return cache.addAll([
+                "/index.html",
+                "/qr.html",
+                "/dowodnowy.html",
+                "/css/main.css",
+                "/js/main.js",
+                "/images/icon-192x192.png",
+                "/images/icon-512x512.png"
+            ]);
+        })
+    );
 });
 
-// Function to show a custom install button or other UI element
-function showInstallButton() {
-    // Show the install button or other UI element
-    const installButton = document.getElementById('install-button');
-    installButton.style.display = 'block';
-    // Add event listener for click event on install button
-    installButton.addEventListener('click', () => {
-        // Call the prompt() method on the deferredPrompt object
-        deferredPrompt.prompt();
-        // Wait for the user to respond to the prompt
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            } else {
-                console.log('User dismissed the install prompt');
-            }
-            // Clear the deferredPrompt object
-            deferredPrompt = null;
-        });
-    });
-}
+// Obsługa zapytań – najpierw sprawdzamy cache, potem sieć
+self.addEventListener("fetch", (event) => {
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            return response || fetch(event.request);
+        })
+    );
+});
